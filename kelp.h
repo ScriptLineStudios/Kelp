@@ -1,12 +1,14 @@
 #ifndef KELP_H
 #define KELP_H
 
+
 typedef enum {
-    NOP, PUSH
+    NOP, PUSH, ADDI, ADDF, PRINTI, PRINTF, JMP, JG
 } Opcode;
 
 typedef struct {
-    int x;
+    int as_int;
+    float as_float;
 } Operand;
 
 typedef struct {
@@ -26,10 +28,26 @@ void emit_instruction(Instructions *instructions, Instruction instruction);
 void write_instructions_to_file(Instructions *instructions, const char *filename); 
 Instructions *read_instructions_from_file(const char *filename); 
 
+#include "vm/kvm.h"
+void kvm_execute_program(Kvm *kvm, Instructions *instructions);
+
+Operand make_operand(float value);
+
 #define RESIZE_INSTRUCTIONS instructions->instructions = realloc(instructions->instructions, sizeof(Instruction) * instructions->num_instructions)
+#define UNUSED(x) (void)x
+#define NO_OPERAND (Operand) {0}
 
 #endif
 #ifdef KELP_IMPLEMENTATION
+
+#include "vm/kvm.c"
+
+Operand make_operand(float value) {
+    Operand operand;
+    operand.as_int = (int)value;
+    operand.as_float = (float)value;
+    return operand;
+}
 
 Instruction make_instruction(Opcode opcode, Operand operand) {
     return (Instruction){.opcode = opcode, .operand = operand};
@@ -56,13 +74,14 @@ Instructions *read_instructions_from_file(const char *filename) {
     FILE * file= fopen(filename, "rb");
 
     size_t num_instructions;
-    fread(&num_instructions, sizeof(size_t), 1, file);
+    int res = fread(&num_instructions, sizeof(size_t), 1, file);
+    UNUSED(res);
 
     Instruction *instructions = malloc(sizeof(Instruction) * num_instructions);
 
     for (size_t i = 0; i < num_instructions; i++) {
         Instruction instruction;
-        fread(&instruction, sizeof(Instruction), 1, file);
+        res = fread(&instruction, sizeof(Instruction), 1, file);
         instructions[i] = instruction;
     }
 
