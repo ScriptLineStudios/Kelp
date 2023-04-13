@@ -28,7 +28,7 @@ void emit_instruction(Instructions *instructions, Instruction instruction);
 void write_instructions_to_file(Instructions *instructions, const char *filename); 
 Instructions *read_instructions_from_file(const char *filename); 
 
-#include "vm/kvm.h"
+#include "kvm/kvm.h"
 void kvm_execute_program(Kvm *kvm, Instructions *instructions);
 
 Operand make_operand(float value);
@@ -40,7 +40,7 @@ Operand make_operand(float value);
 #endif
 #ifdef KELP_IMPLEMENTATION
 
-#include "vm/kvm.c"
+#include "kvm/kvm.c"
 
 Operand make_operand(float value) {
     Operand operand;
