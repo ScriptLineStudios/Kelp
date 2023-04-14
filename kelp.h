@@ -3,7 +3,7 @@
 
 
 typedef enum {
-    NOP, PUSH, ADDI, ADDF, PRINTI, PRINTF, JMP, JG
+    NOP, PUSH, ADDI, ADDF, SUBI, SUBF, MULI, MULF, DIVI, DIVF, SHL, SHR, PRINTI, PRINTF, JMP, JG, 
 } Opcode;
 
 typedef struct {

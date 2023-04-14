@@ -57,6 +57,60 @@ void kvm_execute_program(Kvm *kvm, Instructions *instructions) {
                 ip++;
             }
                 break;
+            case SUBI: {
+                Operand a = pop(kvm);
+                Operand b = pop(kvm);
+                push(kvm, make_operand(b.as_int - a.as_int));
+                ip++;
+            }
+                break;
+            case SUBF: {
+                Operand a2 = pop(kvm);
+                Operand b2 = pop(kvm);
+                push(kvm, make_operand(b2.as_float - a2.as_float));
+                ip++;
+            }
+                break;
+            case DIVI: {
+                Operand a = pop(kvm);
+                Operand b = pop(kvm);
+                push(kvm, make_operand(b.as_int / a.as_int));
+                ip++;
+            }
+                break;
+            case DIVF: {
+                Operand a2 = pop(kvm);
+                Operand b2 = pop(kvm);
+                push(kvm, make_operand(b2.as_float / a2.as_float));
+                ip++;
+            }
+                break;
+            case MULI: {
+                Operand a = pop(kvm);
+                Operand b = pop(kvm);
+                push(kvm, make_operand(b.as_int * a.as_int));
+                ip++;
+            }
+                break;
+            case MULF: {
+                Operand a2 = pop(kvm);
+                Operand b2 = pop(kvm);
+                push(kvm, make_operand(b2.as_float * a2.as_float));
+                ip++;
+            }
+                break;
+            case SHR: {
+                Operand a = pop(kvm);
+                push(kvm, make_operand(a.as_int >> 1));
+                ip++;
+            }
+                break;
+            case SHL: {
+                Operand a2 = pop(kvm);
+                push(kvm, make_operand(a2.as_int << 1));
+                ip++;
+            }
+                break;
             case PRINTI: {
                 printf("%d\n", peek(kvm).as_int);
                 ip++;

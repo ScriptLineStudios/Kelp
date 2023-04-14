@@ -18,6 +18,14 @@ void usage(void) {
     printf("Usage: ./kasma [YOUR_CODE].kasm\n");
 }
 
+/*
+    TODO:
+        - more arethmatic instructions
+        - command line tool for loading *.kelp files
+        - compilation to x86_64 
+        - labels and macros for assembler
+*/
+
 void assemble(char *filename) {
     FILE *file = fopen(filename, "r");
     StrReader *reader = str_reader_new(file);
@@ -39,9 +47,10 @@ void assemble(char *filename) {
         frees[free_count - 1] = (void *)line; 
 
         Str *opcode = split->strs[0]; //important to remeber these are not being allocated and are just references
-        printf("%s\n", opcode->string);
+        
+        printf("%s %d\n", opcode->string, string_to_opcode(opcode->string));
+        
         Str *operand = split->strs[1];
-
         switch (string_to_opcode(opcode->string)) {
             case NOP:
                 break;
@@ -49,6 +58,7 @@ void assemble(char *filename) {
                 emit_instruction(instructions, make_instruction(PUSH, make_operand(atof(operand->string))));
                 break;
             case ADDI:
+                printf("emitting an add instruction\n");
                 emit_instruction(instructions, make_instruction(ADDI, NO_OPERAND));
                 break;
             case ADDF:
@@ -66,6 +76,30 @@ void assemble(char *filename) {
             case JG:
                 emit_instruction(instructions, make_instruction(JG, make_operand(atoi(operand->string))));
                 break;
+            case SUBI:
+                emit_instruction(instructions, make_instruction(SUBI, NO_OPERAND));
+                break;
+            case SUBF:
+                emit_instruction(instructions, make_instruction(SUBF, NO_OPERAND));
+                break;
+            case MULI:
+                emit_instruction(instructions, make_instruction(MULI, NO_OPERAND));
+                break;
+            case MULF:
+                emit_instruction(instructions, make_instruction(MULF, NO_OPERAND));
+                break; 
+            case DIVI:
+                emit_instruction(instructions, make_instruction(DIVI, NO_OPERAND));
+                break;
+            case DIVF:
+                emit_instruction(instructions, make_instruction(DIVF, NO_OPERAND));
+                break; 
+            case SHL:
+                emit_instruction(instructions, make_instruction(SHL, NO_OPERAND));
+                break;
+            case SHR:
+                emit_instruction(instructions, make_instruction(SHR, NO_OPERAND));
+                break;
         }
     }
     printf("free count = %ld\n", free_count);
@@ -77,7 +111,6 @@ void assemble(char *filename) {
     write_instructions_to_file(instructions, "out.kelp");
     instructions_free(instructions);
 }
-
 
 int main(int argc, char **argv) {
     if (argc <= 1) {
