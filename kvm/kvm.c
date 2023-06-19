@@ -1,4 +1,5 @@
 #include "kvm.h"
+#include <string.h>
 
 Kvm *kvm_init() {
     Kvm *kvm = (Kvm*)malloc(sizeof(Kvm));
@@ -27,6 +28,148 @@ Operand pop(Kvm *kvm) {
 
 Operand peek(Kvm *kvm) {
     return kvm->stack[kvm->stack_size - 1];
+}
+
+#define PYTHON_IF do{\
+    char iff[200];\
+    sprintf(iff, "    if ci == %ld:\n", ci);\
+    ci++;\
+    fwrite(iff, strlen(iff), 1, file);\
+}while(0)\
+
+void kvm_dispatch_python_transpilation(Instructions *instructions) {
+    FILE *file = fopen("kelp_python.py", "w");
+    
+    const char *header = "stack = []\n";
+    fwrite(header, strlen(header), 1, file);
+
+    char line[200];
+    sprintf(line, "ni=%ld\nci=0\nwhile ci < ni:\n", instructions->num_instructions);
+    fwrite(line, strlen(line), 1, file);
+    size_t ci = 0;
+    for (int i = 0; i < instructions->num_instructions; i++) {
+        Instruction inst = instructions->instructions[i];
+        switch (inst.opcode) {
+            case NOP: {
+            }
+                break;
+            case PUSH: {
+                PYTHON_IF;
+
+                char line[200];
+                sprintf(line, "        stack.append(%f)\n        ci+=1\n", inst.operand.as_float);
+                fwrite(line, strlen(line), 1, file);
+            }
+                break;
+            case ADDI: {
+                PYTHON_IF;
+
+                char line[200] = "        a = stack.pop()\n        b = stack.pop()\n        stack.append(int(a + b))\n        ci+=1\n";
+                fwrite(line, strlen(line), 1, file);
+            }
+                break;
+            case ADDF: {
+                PYTHON_IF;
+
+                char line[200] = "        a = stack.pop()\n        b = stack.pop()\n        stack.append(float(a + b))\n        ci+=1\n";
+                fwrite(line, strlen(line), 1, file);
+            }
+                break;
+            case SUBI: {
+                PYTHON_IF;
+
+                char line[200] = "        a = stack.pop()\n        b = stack.pop()\n        stack.append(int(b - a))\n        ci+=1\n";
+                fwrite(line, strlen(line), 1, file);
+            }
+                break;
+            case SUBF: {
+                PYTHON_IF;
+
+                char line[200] = "        a = stack.pop()\n        b = stack.pop()\n        stack.append(float(b - a))\n        ci+=1\n";
+                fwrite(line, strlen(line), 1, file);
+            }
+                break;
+            case DIVI: {
+                PYTHON_IF;
+
+                char line[200] = "        a = stack.pop()\n        b = stack.pop()\n        stack.append(int(a / b))\n        ci+=1\n";
+                fwrite(line, strlen(line), 1, file);
+            }
+                break;
+            case DIVF: {
+                PYTHON_IF;
+
+                char line[200] = "        a = stack.pop()\n        b = stack.pop()\n        stack.append(float(a / b))\n        ci+=1\n";
+                fwrite(line, strlen(line), 1, file);
+            }
+                break;
+            case MULI: {
+                PYTHON_IF;
+
+                char line[200] = "        a = stack.pop()\n        b = stack.pop()\n        stack.append(int(a * b))\n        ci+=1\n";
+                fwrite(line, strlen(line), 1, file);
+            }
+                break;
+            case MULF: {
+                PYTHON_IF;
+
+                char line[200] = "        a = stack.pop()\n        b = stack.pop()\n        stack.append(float(a * b))\n        ci+=1\n";
+                fwrite(line, strlen(line), 1, file);
+            }
+                break;
+            case SHR: {
+            }
+                break;
+            case SHL: {
+            }
+                break;
+            case PRINTI: {
+                PYTHON_IF;
+
+                char line[200] = "        print(int(stack[len(stack) - 1]))\n        ci+=1\n";
+                fwrite(line, strlen(line), 1, file);
+            }
+                break;
+            case PRINTF: {
+                PYTHON_IF;
+
+                char line[200] = "        print(stack[len(stack) - 1])\n        ci+=1\n";
+                fwrite(line, strlen(line), 1, file);
+            }
+                break;
+            case JMP: {
+            }
+                break;
+            case JG: {
+                PYTHON_IF;
+
+                char line[200];
+                sprintf(line, "        if stack[len(stack) - 1] > 0:\n            ci=%d\n", inst.operand.as_int);
+                fwrite(line, strlen(line), 1, file);
+
+                sprintf(line, "        else:\n            ci+=1\n", inst.operand.as_int);
+                fwrite(line, strlen(line), 1, file);
+            }
+                break;
+            default: {
+                printf("ERROR: Unknown opcode %ld\n", (size_t)inst.opcode);
+                exit(1);
+            } 
+        }
+    }
+    fclose(file);
+}
+
+void kvm_transpile(Instructions *instructions, KelpTranspileTarget target) {
+    switch (target) {
+        case KVM_PYTHON: {
+                kvm_dispatch_python_transpilation(instructions);
+            }
+            break;
+        default:
+            printf("ERROR: Unknown transpilation target!\n");
+            exit(1);
+    }
 }
 
 void kvm_execute_program(Kvm *kvm, Instructions *instructions) {

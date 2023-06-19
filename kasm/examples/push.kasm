@@ -1,4 +1,6 @@
-push 2000
 push 10
-addi
-printi
+%loop
+    push 1
+    subi
+    printi
+    jg 1

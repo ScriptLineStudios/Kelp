@@ -35,9 +35,15 @@ void assemble(char *filename) {
     size_t free_count = 0;
     void **frees = malloc(sizeof(void *) * free_count);
     while (!feof(file)) {
-        Str *line = str_read_line(reader);
+        Str *line = str_trim_left(str_read_line(reader));
         StrArray *split = str_split_by(line, ' ');
-        
+
+        if (str_in(line, '%')) {
+            StrArray *s = str_split_by(line, '%');
+            Str *name = s->strs[1];
+            printf("name = %s\n", name->string);
+        }
+
         free_count++;
         frees = realloc(frees, sizeof(void *) * free_count);
         frees[free_count - 1] = (void *)split; 
@@ -47,10 +53,9 @@ void assemble(char *filename) {
         frees[free_count - 1] = (void *)line; 
 
         Str *opcode = split->strs[0]; //important to remeber these are not being allocated and are just references
-        
-        printf("%s %d\n", opcode->string, string_to_opcode(opcode->string));
-        
         Str *operand = split->strs[1];
+        printf("%s\n", opcode->string);
+        
         switch (string_to_opcode(opcode->string)) {
             case NOP:
                 break;
@@ -58,7 +63,6 @@ void assemble(char *filename) {
                 emit_instruction(instructions, make_instruction(PUSH, make_operand(atof(operand->string))));
                 break;
             case ADDI:
-                printf("emitting an add instruction\n");
                 emit_instruction(instructions, make_instruction(ADDI, NO_OPERAND));
                 break;
             case ADDF:
@@ -100,6 +104,9 @@ void assemble(char *filename) {
             case SHR:
                 emit_instruction(instructions, make_instruction(SHR, NO_OPERAND));
                 break;
+            default:
+                printf("unknown instruction: %s\n", opcode->string);
+                exit(1);
         }
     }
     printf("free count = %ld\n", free_count);

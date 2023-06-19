@@ -123,6 +123,31 @@ Str *str_concat(Str *str1, Str *str2) {
     return new_str;
 }
 
+bool str_in(Str *str, const char find) {
+    for (size_t i = 0; i < str->length; i++) {
+        if (str->string[i] == find) {
+            return true;
+        }
+    }
+    return false;
+}
+
+Str *str_trim_left(Str *str) {
+    Str *new = str_new_blank(0);
+    bool add = false;
+    for (size_t i = 0; i < str->length; i++) {
+        if (str->string[i] != ' ') {
+            add = true;
+        }
+        if (add) {
+            str_append(new, str->string[i]);
+        }
+    }
+    new->string[new->length] = '\0';
+    str_free(str);
+    return new;
+}
+
 StrArray *str_split_by(Str *str, const char delim) {
     //this function is kinda goofy ngl
     StrArray *array = str_array_new();
@@ -148,6 +173,7 @@ StrArray *str_split_by(Str *str, const char delim) {
             size = 0;
         }
     }
+    tmp->string[size] = '\0';
     str_array_add(array, str_copy(tmp));
 
     for (size_t i = 0; i < reference_count; i++) {

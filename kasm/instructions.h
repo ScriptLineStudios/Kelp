@@ -5,10 +5,9 @@
 #include <stdint.h>
 
 Opcode string_to_opcode(char *string) {
-    printf("opcode = %s cmp = %d\n", string, strcmp(string, "addi"));
     if      (!strcmp(string, "nop"))    return NOP;
     else if (!strcmp(string, "push"))   return PUSH;
-    else if (strcmp(string, "addi") == 5)   return ADDI;
+    else if (!strcmp(string, "addi"))   return ADDI;
     else if (!strcmp(string, "addf"))   return ADDF;
     else if (!strcmp(string, "subi"))   return SUBI;
     else if (!strcmp(string, "subf"))   return SUBF;
